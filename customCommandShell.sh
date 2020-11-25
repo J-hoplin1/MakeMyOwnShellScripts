@@ -15,7 +15,7 @@ function printShellInfo(){
     #해당 bash shell 사용자 명
     echo "User Name | $(whoami)"
     #User의 IP주소
-    ipad=$(hostname -I)
+    ipad=${IPInfo[0]}
     echo "User IP Address | $ipad"
     #쉘 스크립트 실행 시간 알려주는 줄
     echo "Shell start at | $(date +%Y)/$(date +%m)/$(date +%d)  $(date +%H):$(date +%M)"
@@ -30,7 +30,8 @@ function printParamError(){
 
 clearShell
 madeBy="Hoplin"
-
+IPInfo=`hostname -I`
+IPInfo=($IPInfo)
 
 :<<END
 
@@ -115,8 +116,11 @@ do
         fi
         #정상적인 매개변수 1개 입력되었을 경우
         if [ $inputArLen -ge 2 ]; then
-            echo `ps -ef|grep ${valTyped[1]}`
+            result=`ps -ef|grep ${valTyped[1]}`
+            echo "$result"
         fi
+        ;;
+        'Hoplin'|'hoplin') echo "Hello user! My name is Hoplin who made this shell!"
         ;;
         'Q'|'q'|'X'|'x') echo "Close Shell"
         clearShell
