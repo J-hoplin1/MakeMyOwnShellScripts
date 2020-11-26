@@ -18,9 +18,10 @@ function printShellInfo(){
     ipad=${IPInfo[0]}
     echo "User IP Address | $ipad"
     #쉘 스크립트 실행 시간 알려주는 줄
-    echo "Shell start at | $(date +%Y)/$(date +%m)/$(date +%d)  $(date +%H):$(date +%M)"
+    echo "Shell start at | $(date +%Y)/$(date +%m)/$(date +%d) $(date +%H):$(date +%M)"
+    echo "Shell location | $(pwd)"
     echo "Enter 'option' command to see supported command lines"
-    echo " "
+    echo "  "
 }
 
 #명령어 매개변수 개수오류를 출력하는 함수. 매개변수로는 오류 메세지를 받는다.
@@ -33,7 +34,14 @@ madeBy="Hoplin"
 IPInfo=`hostname -I`
 IPInfo=($IPInfo)
 
+#Command가 사용된 시간이 저장되는 배열
+commandUseTime=()
+#쉘 명령어 기록
+shellCommandHistoryStack=()
+
 :<<END
+
+참고하기 매우 좋은 블로그 : https://mug896.github.io/bash-shell/index.html
 
 주의할 점 : 쉘 스크립트에서는 명령어 저장을 할때 (변수명)=(데이터) 에서 데이터와 변수명 등호를 모두 붙여서 써야한다.
 
@@ -61,6 +69,12 @@ cut [option] [file]
 array=(1 2 3 4 5)
 echo "${#array}" -> 이렇게 하면 배열 길이를 알 수 있다.
 
+* read 명령어 옵션들
+
+- a : 입력값을 array에 할당된다.
+- r : Raw모드 백슬래시 기호를 이스케이프 시퀸스로 해석하지 않는다.
+
+
 END
 
 printShellInfo
@@ -70,7 +84,17 @@ while true
 do
     echo -n ">> "
     #사용자 입력값에 대해 매개변수 및 옵션 검수를 위해 결과값을 바로 배열로 저장한다.
-    read -a valTyped
+    read input
+    #명령어가 입력되면 commandUseTime배열에는 입력된 시간이 저장된다
+    commandUseTime+=("$(date +%Y)/$(date +%m)/$(date +%d) $(date +%H):$(date +%M):$(date +%S)")
+    #완전한 문자열 형태의 명령어는 shellCommandHistoryStack배열에 저장된다.
+    shellCommandHistoryStack+=("$input")
+    :<<END
+    IFS : 내부 필드 구분 기호
+    Shell은 변수의 값을 표시할 때 IFS변수에 설정되어있는 값을 이용하여 단어를 분리해 표시한다.
+    여기서 단어를 분리한다는 의미는 IFS변수에 설정되어 있는 문자를 space로 변경하여 표시한다는것이다.
+END
+    IFS=' ' read -r -a valTyped <<< "$input" # 이 문을 해석하자면 ' '을 기준으로 split을 한다는 이야기이다.
     #가장 맨 앞의 입력값은 명령어가 되어야한다.
     input=${valTyped[0]}
     #사용자가 입력한 부분을 배열로 변환하고 배열의 개수를 inputArLen에 저장해준다.
@@ -84,16 +108,19 @@ do
         echo "K or k : Force Close Process base on PID"
         echo "C or c : Clear Shell"
         echo "fitp : Search process base on parameter -> Parameter requires Regular Expression or Extention you want to find"
+        echo "history : Show record of command that user entered. Show command timeline with time and command."
         echo "Q or q or X or x : Exit shell"
         ;;
         'P'|'p')
         echo "Run PS : Process liSt"
         #이렇게 해야 값이 세로로(일반적인 리눅스 쉘에서 출력되는것처럼)출력된다.
         result=`ps -xl`
-        echo "$result" 
-        #ps -xl : 접속된 터미널 뿐만 아니라 사용되고있는 모든 프로세스들에 대한(x) '자세한 내용'(l)출력 
-        #리눅스 명령어 ps는 process list를 반환하는 명령어입니다. 기본적으로 ps명령어만 사용하면 cmd,bash와 같은 사용자가 범접하는 측면에서만 볼 수 있는 것들만 보여줍니다.
-        #ps명령어에 -e옵션을 넣어주면 시스템 프로세스까지 모두 보여줍니다.
+        echo "$result"
+        :<<END 
+        ps -xl : 접속된 터미널 뿐만 아니라 사용되고있는 모든 프로세스들에 대한(x) '자세한 내용'(l)출력 
+        리눅스 명령어 ps는 process list를 반환하는 명령어입니다. 기본적으로 ps명령어만 사용하면 cmd,bash와 같은 사용자가 범접하는 측면에서만 볼 수 있는 것들만 보여줍니다.
+        ps명령어에 -e옵션을 넣어주면 시스템 프로세스까지 모두 보여줍니다.
+END
         ;;
         'K'|'k') echo -n "Enter PID(Process ID) : "
         read PID
@@ -122,10 +149,20 @@ do
         ;;
         'Hoplin'|'hoplin') echo "Hello user! My name is Hoplin who made this shell!"
         ;;
+        'History'|'history')
+        historyStackLength=${#shellCommandHistoryStack[@]}
+        for ((a=0; a<historyStackLength;a++))
+        do
+            echo -n "${commandUseTime[a]}       "
+            echo "${shellCommandHistoryStack[a]}"
+        done
+        ;;
         'Q'|'q'|'X'|'x') echo "Close Shell"
         clearShell
         exit 100
         ;;
-        *) echo "Entered command $input is not supported by this shell. Enter 'option' to look supported command"
+        *)
+        echo "  " 
+        echo "Entered command '$input' is not supported by this shell. Enter 'option' to look supported command"
     esac
 done
