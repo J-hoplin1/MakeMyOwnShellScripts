@@ -11,6 +11,7 @@ function clearShell(){
 #쉘이 시작되거나 clear되는 경우에 
 function printShellInfo(){
     #Shell제작자 명
+    echo "-------------------------------------------------------------------------------"
     echo "Shell made by | $madeBy"
     #해당 bash shell 사용자 명
     echo "User Name | $(whoami)"
@@ -19,8 +20,11 @@ function printShellInfo(){
     echo "User IP Address | $ipad"
     #쉘 스크립트 실행 시간 알려주는 줄
     echo "Shell start at | $(date +%Y)/$(date +%m)/$(date +%d) $(date +%H):$(date +%M)"
-    echo "Shell location | $(pwd)"
-    echo "Enter 'option' command to see supported command lines"
+    echo "Shell running location | $(pwd)"
+    echo $kernelVersion | tr -d " "
+    echo "  "
+    echo "* Enter 'option' command to see support command lines"
+    echo "-------------------------------------------------------------------------------"
     echo "  "
 }
 
@@ -60,6 +64,7 @@ clearShell
 madeBy="Hoplin"
 IPInfo=`hostname -I`
 IPInfo=($IPInfo)
+kernelVersion=`hostnamectl | grep Kernel`
 
 #Command가 사용된 시간이 저장되는 배열
 commandUseTime=()
@@ -131,15 +136,16 @@ END
 
         'Option'|'OPTION'|'option')
         echo "Option : Show all of the commands which this shell script support"
-        echo "P or p : Show running process list"
+        echo "PL or pl : Show running process list"
         echo "K or k : Force Close Process base on PID"
         echo "C or c : Clear Shell"
         echo "fitp : Search process base on parameter -> Parameter requires Regular Expression or Extention you want to find"
-        echo "history : Show record of command that user entered. Show command timeline with time and command."
+        echo "history : Show record of command that user entered. Show command timeline with time and command. -w option to save Command Record"
         echo "hwinfo : Show basic HardWare Information. Include CPU Information, Total volume of RAM, GPU Information"
+        echo "pysh : Execute Python3 Shell Command"
         echo "Q or q or X or x : Exit shell"
         ;;
-        'P'|'p')
+        'PL'|'pl')
         echo "Run PS : Process liSt"
         #이렇게 해야 값이 세로로(일반적인 리눅스 쉘에서 출력되는것처럼)출력된다.
         result=`ps -xl`
@@ -150,7 +156,7 @@ END
         ps명령어에 -e옵션을 넣어주면 시스템 프로세스까지 모두 보여줍니다.
 END
         ;;
-        'K'|'k') echo -n "Enter PID(Process ID) : "
+        'k'|'K') echo -n "Enter PID(Process ID) : "
         read PID
         echo `kill -9 $PID` # kill 명령어의 대표적인 옵션에는 -9 -15가 있는데 차이점은 -9 는 강제종료, -15는 작업종료를 의미합니다.
         echo "Successfully kill PID : $PID"
@@ -170,7 +176,7 @@ END
             continue
         fi
         #정상적인 매개변수 1개 입력되었을 경우
-        if [ $inputArLen -ge 2 ]; then
+        if [ $inputArLen -eq 2 ]; then
             result=`ps -ef|grep ${valTyped[1]}`
             echo "$result"
         fi
@@ -181,14 +187,46 @@ END
         'Hoplin'|'hoplin') echo "Hello user! My name is Hoplin who made this shell!"
         ;;
         'History'|'history')
-        historyStackLength=${#shellCommandHistoryStack[@]}
-        for ((a=0; a<historyStackLength;a++))
-        do
-            echo -n "${commandUseTime[a]}       "
-            echo "${shellCommandHistoryStack[a]}"
-        done
+        if [ $inputArLen -lt 2 ]; then
+            historyStackLength=${#shellCommandHistoryStack[@]}
+            for ((a=0; a<historyStackLength;a++))
+            do
+                echo -n "${commandUseTime[a]}       "
+                echo "${shellCommandHistoryStack[a]}"
+            done
+        elif [ $inputArLen -eq 2 ]; then
+            if [ "${valTyped[1]}" == "-w" ]; then
+            # >> : 파일에 이어쓰기를 한다.
+                echo "This record written at : $(date +%Y)/$(date +%m)/$(date +%d) $(date +%H):$(date +%M):$(date +%S)" >> CommandHistory.txt
+                echo "Shell user : $(whoami)" >> CommandHistory.txt
+                echo "------------------------------------------------------------------" >> CommandHistory.txt
+                historyStackLength=${#shellCommandHistoryStack[@]}
+                for ((a=0; a<historyStackLength;a++))
+                do
+                    echo "${commandUseTime[a]}      ${shellCommandHistoryStack[a]}" >> CommandHistory.txt
+                done
+                echo "------------------------------------------------------------------" >> CommandHistory.txt
+                echo "  " >> CommandHistory.txt
+            else
+                echo "Wrong parameter or option : ${valTyped[1]}"
+            fi
+        else
+            printParamError "Command 'fitp' requires 2 parameter but 3 or more parameter entered"
+        fi
         ;;
-        'Q'|'q'|'X'|'x') echo "Close Shell"
+        'pysh')
+        pyV=`python3 -V`
+        echo "  "
+        echo "Python Shell : Version $pyV"
+        echo "Type exit() to exit python shell"
+        echo "  "
+        `python3`
+        echo "  "
+        echo "Back to Shell"
+        ;;
+        'covidKR')
+        ;;
+        'Q'|'q'|'X'|'x')
         clearShell
         exit 100
         ;;
