@@ -24,6 +24,33 @@ function printShellInfo(){
     echo "  "
 }
 
+function preLoadPCPerformance(){
+    #Get CPU Info
+    cpuinfo=`cat /proc/cpuinfo|egrep "model name"|head -n 1`
+    IFS=':' read -r -a arraY <<< "$cpuinfo"
+    #앞뒤 공백 제거 : ${변수:1:-1} 이 말은 변수의 1번째부터 뒤에서 1번째까지 가져오라는 뜻이다.
+    cpuInfo=${arraY[1]:1:-1}
+
+    #Get main memory(RAM) Info
+    ramInfo=`cat /proc/meminfo | grep "MemTotal"`
+    IFS=':' read -r -a arraY <<< "$ramInfo"
+    ramInfo=${arraY[1]:8:-3}
+    res=`expr $ramInfo / 1024 / 1024 + 1`
+
+    #Get GPU Info
+    gpuinfo=`lspci | grep -i VGA`
+    IFS=':' read -r -a arraY <<< "$gpuinfo"
+    gpuInfo=${arraY[2]:1}
+
+    echo "Hardware Information"
+    echo "  "
+    echo "CPU : $cpuInfo"
+    echo "RAM Total : ${res} GB"
+    echo "GPU Info : $gpuInfo"
+
+
+}
+
 #명령어 매개변수 개수오류를 출력하는 함수. 매개변수로는 오류 메세지를 받는다.
 function printParamError(){
     echo "Parameter Error : $1"
@@ -109,6 +136,7 @@ END
         echo "C or c : Clear Shell"
         echo "fitp : Search process base on parameter -> Parameter requires Regular Expression or Extention you want to find"
         echo "history : Show record of command that user entered. Show command timeline with time and command."
+        echo "hwinfo : Show basic HardWare Information. Include CPU Information, Total volume of RAM, GPU Information"
         echo "Q or q or X or x : Exit shell"
         ;;
         'P'|'p')
@@ -146,6 +174,9 @@ END
             result=`ps -ef|grep ${valTyped[1]}`
             echo "$result"
         fi
+        ;;
+        'hwinfo')
+        preLoadPCPerformance
         ;;
         'Hoplin'|'hoplin') echo "Hello user! My name is Hoplin who made this shell!"
         ;;
