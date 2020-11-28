@@ -12,6 +12,8 @@ My shell script commands
 
 - Shell Script를 이용하여 bash command 작성하면서 확실한점은 shell script의 기본적인 문법보다는 **리눅스 명령어의 활용법과 Regular Expression에 중점을 두고 활용방안을 생각하는것**에 무게를 두어야한다고 느꼈습니다.
 
+- 클라우드 IDE 환경 내에서는 사용불가
+
 ***
 
 ### 구현(?) 해본 명령어들
