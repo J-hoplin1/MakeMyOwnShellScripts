@@ -28,6 +28,34 @@ function printShellInfo(){
     echo "  "
 }
 
+function viewCovidKR(){
+    readData="commandExecuteEngine/covidInf.txt"
+    #Read file and save datas in array
+    dataArr=()
+
+    while IFS= read -r line
+    do
+        dataArr+=("$line")
+    done < "$readData"
+
+    if [ "${dataArr[0]}" = "Error" ]; then
+        echo "${dataArr[0]} : ${dataArr[1]}"
+    else
+        echo "  "
+        echo "Covid19 Korea Status | Date : $(date +%Y)/$(date +%m)/$(date +%d)"
+        echo "  "
+        echo "-----------------------------------------------------------------"
+        echo "  "
+        echo "Recent Updated Period : ${dataArr[0]}"
+        echo "Daily covid19 confirmation(Aboard + Domestic) : ${dataArr[1]}"
+        echo "Cumulative number of confirmed cases : ${dataArr[2]}"
+        echo "Treatment Completed : ${dataArr[3]}"
+        echo "Under Treatment : ${dataArr[4]}"
+        echo "Total of Dead : ${dataArr[5]}"
+        echo "  "
+    fi
+}
+
 function preLoadPCPerformance(){
     #Get CPU Info
     cpuinfo=`cat /proc/cpuinfo|egrep "model name"|head -n 1`
@@ -59,6 +87,7 @@ function preLoadPCPerformance(){
 function printParamError(){
     echo "Parameter Error : $1"
 }
+
 
 clearShell
 madeBy="Hoplin"
@@ -142,6 +171,7 @@ END
         echo "fitp : Search process base on parameter -> Parameter requires Regular Expression or Extention you want to find"
         echo "history : Show record of command that user entered. Show command timeline with time and command. -w option to save Command Record"
         echo "hwinfo : Show basic HardWare Information. Include CPU Information, Total volume of RAM, GPU Information"
+        echo "covidKR : Show South Korea covid19 status"
         echo "pysh : Execute Python3 Shell Command"
         echo "Q or q or X or x : Exit shell"
         ;;
@@ -224,7 +254,10 @@ END
         echo "  "
         echo "Back to Shell"
         ;;
-        'covidKR')
+        'covidKR'|'covidkr')
+        `python3 commandExecuteEngine/covid19.py`
+        viewCovidKR
+        `rm commandExecuteEngine/covidInf.txt`
         ;;
         'Q'|'q'|'X'|'x')
         clearShell
