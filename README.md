@@ -57,3 +57,11 @@ My shell script commands
 - 파이썬 쉘 실행
 
 ![](img/5.png)
+
+- 기본적인 하드웨어 성능 조회
+
+![](img/6.png)
+
+- 명령어 기록 확인하기
+
+![](img/7.png)
