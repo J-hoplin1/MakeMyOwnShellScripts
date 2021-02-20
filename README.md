@@ -65,3 +65,7 @@ My shell script commands
 - 명령어 기록 확인하기
 
 ![](img/7.png)
+
+- 쉘 로그 출력하기
+
+![](img/8.png)
