@@ -33,3 +33,27 @@ My shell script commands
 - q,x : 쉘을 종료합니다.
 
 - pysh : 리눅스 기본 내장 Python3 쉘을 실행합니다.
+
+***
+
+### 구현 예시 사진
+
+- 초기화면
+
+![img](img/1.png)
+
+- option 명령어
+
+![](img/2.png)
+
+- covidKR 명령어 (파이썬으로 명령어 엔진 제작)
+
+![](img/3.png)
+
+- 특정 확장자 혹은 정규표현식에 따른 프로세스 검색(ps -ef | grep 활용)
+
+![](img/4.png)
+
+- 파이썬 쉘 실행
+
+![](img/5.png)
